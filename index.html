@@ -5,79 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Công cụ chuyển đổi & Làm sạch Link Google Drive</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        h2 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 8px;
-        }
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-family: monospace;
-            font-size: 14px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .result-section {
-            margin-top: 25px;
-        }
-        .stats {
-            font-weight: bold;
-            color: #e74c3c;
-            margin-bottom: 8px;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #2c3e50; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; }
+        textarea { width: 100%; height: 120px; padding: 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-size: 14px; resize: vertical; }
+        button { background-color: #3498db; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        button:hover { background-color: #2980b9; }
+        .result-section { margin-top: 25px; }
+        .stats { font-weight: bold; color: #e74c3c; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Chuyển đổi & Chuẩn hóa Link Google Drive Batch</h2>
-    <label for="inputLinks">Nhập danh sách link Google Drive (cách nhau bởi dấu chấm phẩy hoặc xuống dòng):</label>
-    <textarea id="inputLinks" placeholder="https://drive.google.com/file/d/ID_1/view?usp=sharing; 
-https://drive.google.com/file/d/ID_2/view?usp=sharing"></textarea>
+    <h2>Chuyển đổi & Chuẩn hóa Link Google Drive (Hỗ trợ dấu phẩy)</h2>
+    <label for="inputLinks">Dán danh sách link Google Drive (cách nhau bởi dấu phẩy, chấm phẩy hoặc xuống dòng):</label>
+    <textarea id="inputLinks" placeholder="https://drive.google.com/... , https://drive.google.com/..."></textarea>
     
     <button onclick="convertAndCleanLinks()">Chuyển Đổi & Làm Sạch Ngay</button>
 
     <div class="result-section">
         <div class="stats" id="statsCount">Số lượng ảnh chuyển đổi: 0</div>
-        <label for="outputLinks">Kết quả trả về:</label>
-        <textarea id="outputLinks" readonly placeholder="Kết quả chuẩn hóa sẽ hiển thị ở đây..."></textarea>
+        <label for="outputLinks">Kết quả trả về (cách nhau bởi dấu chấm phẩy):</label>
+        <textarea id="outputLinks" readonly placeholder="Kết quả sẽ hiển thị ở đây..."></textarea>
         <button onclick="copyResult()" style="background-color: #2ecc71;">Sao chép kết quả</button>
     </div>
 </div>
@@ -86,10 +37,7 @@ https://drive.google.com/file/d/ID_2/view?usp=sharing"></textarea>
 function extractFileId(url) {
     url = url.trim();
     let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-    if (match && match[1]) {
-        return match[1];
-    }
-    return null;
+    return match ? match[1] : null;
 }
 
 function convertAndCleanLinks() {
@@ -99,15 +47,13 @@ function convertAndCleanLinks() {
         return;
     }
 
-    // Bước 1: Thay thế toàn bộ ký tự xuống dòng thành dấu chấm phẩy để hỗ trợ cả dán danh sách theo cột
-    let normalizedInput = rawInput.replace(/[\r\n]+/g, ';');
+    // Thay thế toàn bộ dấu phẩy (,) và xuống dòng thành dấu chấm phẩy chung
+    let normalizedInput = rawInput.replace(/[,;\r\n]+/g, ';');
 
-    // Bước 2: Tách chuỗi theo dấu chấm phẩy
     let links = normalizedInput.split(';');
     let convertedArray = [];
 
     links.forEach(item => {
-        // Bước 3: Triệt tiêu toàn bộ khoảng trắng thừa ở đầu, cuối và bên trong nếu có
         let cleanLink = item.replace(/\s+/g, '').trim();
         if (cleanLink.length > 0) {
             let fileId = extractFileId(cleanLink);
@@ -119,10 +65,7 @@ function convertAndCleanLinks() {
         }
     });
 
-    // Hiển thị số lượng
     document.getElementById('statsCount').innerText = `Số lượng ảnh chuyển đổi thành công: ${convertedArray.length}`;
-
-    // Nối lại bằng dấu chấm phẩy và khoảng trắng chuẩn gọn gàng
     document.getElementById('outputLinks').value = convertedArray.join('; ');
 }
 
